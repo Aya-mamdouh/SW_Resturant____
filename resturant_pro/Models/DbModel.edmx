@@ -25,6 +25,23 @@
           <Property Name="Description" Type="nvarchar(max)" />
           <Property Name="Image" Type="nvarchar(max)" />
         </EntityType>
+        <EntityType Name="Order">
+          <Key>
+            <PropertyRef Name="orderId" />
+          </Key>
+          <Property Name="orderId" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar(max)" />
+          <Property Name="Price" Type="float" />
+          <Property Name="Image" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="orderMeal">
+          <Key>
+            <PropertyRef Name="MealId" />
+            <PropertyRef Name="orderId" />
+          </Key>
+          <Property Name="MealId" Type="int" Nullable="false" />
+          <Property Name="orderId" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="User">
           <Key>
             <PropertyRef Name="Id" />
@@ -33,51 +50,61 @@
           <Property Name="UserName" Type="varchar" MaxLength="50" />
           <Property Name="Address" Type="varchar" MaxLength="50" />
           <Property Name="Password" Type="varchar" MaxLength="50" />
+          <Property Name="orderId" Type="int" />
         </EntityType>
-        <EntityType Name="UserMeal">
-          <Key>
-            <PropertyRef Name="Id" />
-            <PropertyRef Name="MealId" />
-          </Key>
-          <Property Name="Id" Type="int" Nullable="false" />
-          <Property Name="MealId" Type="int" Nullable="false" />
-        </EntityType>
-        <Association Name="FK">
-          <End Role="User" Type="Self.User" Multiplicity="1" />
-          <End Role="UserMeal" Type="Self.UserMeal" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="User">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="UserMeal">
-              <PropertyRef Name="Id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK1">
+        <Association Name="ff">
           <End Role="Meal" Type="Self.Meal" Multiplicity="1" />
-          <End Role="UserMeal" Type="Self.UserMeal" Multiplicity="*" />
+          <End Role="orderMeal" Type="Self.orderMeal" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Meal">
               <PropertyRef Name="MealId" />
             </Principal>
-            <Dependent Role="UserMeal">
+            <Dependent Role="orderMeal">
               <PropertyRef Name="MealId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_orderMeal_ToTable">
+          <End Role="Order" Type="Self.Order" Multiplicity="1" />
+          <End Role="orderMeal" Type="Self.orderMeal" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="orderId" />
+            </Principal>
+            <Dependent Role="orderMeal">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_Toorder">
+          <End Role="Order" Type="Self.Order" Multiplicity="0..1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="orderId" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="orderId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="DatabaseModelStoreContainer">
           <EntitySet Name="Employee" EntityType="Self.Employee" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Meal" EntityType="Self.Meal" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Order" EntityType="Self.Order" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="orderMeal" EntityType="Self.orderMeal" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="UserMeal" EntityType="Self.UserMeal" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK" Association="Self.FK">
-            <End Role="User" EntitySet="User" />
-            <End Role="UserMeal" EntitySet="UserMeal" />
-          </AssociationSet>
-          <AssociationSet Name="FK1" Association="Self.FK1">
+          <AssociationSet Name="ff" Association="Self.ff">
             <End Role="Meal" EntitySet="Meal" />
-            <End Role="UserMeal" EntitySet="UserMeal" />
+            <End Role="orderMeal" EntitySet="orderMeal" />
+          </AssociationSet>
+          <AssociationSet Name="FK_orderMeal_ToTable" Association="Self.FK_orderMeal_ToTable">
+            <End Role="Order" EntitySet="Order" />
+            <End Role="orderMeal" EntitySet="orderMeal" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_Toorder" Association="Self.FK_User_Toorder">
+            <End Role="Order" EntitySet="Order" />
+            <End Role="User" EntitySet="User" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -93,7 +120,7 @@
           <Property Name="Price" Type="Double" />
           <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="Image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Users" Relationship="Self.UserMeal" FromRole="Meal" ToRole="User" />
+          <NavigationProperty Name="Orders" Relationship="DatabaseModel.orderMeal1" FromRole="Meal" ToRole="Order" />
         </EntityType>
         <EntityType Name="User">
           <Key>
@@ -103,21 +130,23 @@
           <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="Address" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Meals" Relationship="Self.UserMeal" FromRole="User" ToRole="Meal" />
+          <Property Name="orderId" Type="Int32" />
+          <NavigationProperty Name="Order" Relationship="DatabaseModel.FK_User_Toorder" FromRole="User" ToRole="Order" />
         </EntityType>
-        <Association Name="UserMeal">
-          <End Role="User" Type="Self.User" Multiplicity="*" />
-          <End Role="Meal" Type="Self.Meal" Multiplicity="*" />
-        </Association>
         <EntityContainer Name="DatabaseEntities1" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Meals" EntityType="Self.Meal" />
           <EntitySet Name="Users" EntityType="Self.User" />
-          <AssociationSet Name="UserMeal" Association="Self.UserMeal">
-            <End Role="User" EntitySet="Users" />
-            <End Role="Meal" EntitySet="Meals" />
-          </AssociationSet>
           <EntitySet Name="Employees" EntityType="DatabaseModel.Employee" />
-        </EntityContainer>
+          <EntitySet Name="Orders" EntityType="DatabaseModel.Order" />
+          <AssociationSet Name="orderMeal1" Association="DatabaseModel.orderMeal1">
+            <End Role="Meal" EntitySet="Meals" />
+            <End Role="Order" EntitySet="Orders" />
+          </AssociationSet>
+          <AssociationSet Name="FK_User_Toorder" Association="DatabaseModel.FK_User_Toorder">
+            <End Role="Order" EntitySet="Orders" />
+            <End Role="User" EntitySet="Users" />
+          </AssociationSet>
+          </EntityContainer>
         <EntityType Name="Employee">
           <Key>
             <PropertyRef Name="id" />
@@ -128,7 +157,34 @@
           <Property Name="phone" Type="Int32" Nullable="false" />
           <Property Name="address" Type="String" Nullable="false" MaxLength="50" FixedLength="true" Unicode="true" />
         </EntityType>
-      </Schema>
+        <EntityType Name="Order">
+          <Key>
+            <PropertyRef Name="orderId" />
+          </Key>
+          <Property Name="orderId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Meals" Relationship="DatabaseModel.orderMeal1" FromRole="Order" ToRole="Meal" />
+          <NavigationProperty Name="Users" Relationship="DatabaseModel.FK_User_Toorder" FromRole="Order" ToRole="User" />
+          <Property Name="Name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Price" Type="Double" />
+          <Property Name="Image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="orderMeal1">
+          <End Type="DatabaseModel.Meal" Role="Meal" Multiplicity="*" />
+          <End Type="DatabaseModel.Order" Role="Order" Multiplicity="*" />
+        </Association>
+        <Association Name="FK_User_Toorder">
+          <End Type="DatabaseModel.Order" Role="Order" Multiplicity="0..1" />
+          <End Type="DatabaseModel.User" Role="User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Order">
+              <PropertyRef Name="orderId" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -148,6 +204,7 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="DatabaseModel.User">
               <MappingFragment StoreEntitySet="User">
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
                 <ScalarProperty Name="Address" ColumnName="Address" />
@@ -155,14 +212,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <AssociationSetMapping Name="UserMeal" TypeName="DatabaseModel.UserMeal" StoreEntitySet="UserMeal">
-            <EndProperty Name="User">
-              <ScalarProperty Name="Id" ColumnName="Id" />
-            </EndProperty>
-            <EndProperty Name="Meal">
-              <ScalarProperty Name="MealId" ColumnName="MealId" />
-            </EndProperty>
-          </AssociationSetMapping>
           <EntitySetMapping Name="Employees">
             <EntityTypeMapping TypeName="DatabaseModel.Employee">
               <MappingFragment StoreEntitySet="Employee">
@@ -174,7 +223,25 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-        </EntityContainerMapping>
+          <EntitySetMapping Name="Orders">
+            <EntityTypeMapping TypeName="DatabaseModel.Order">
+              <MappingFragment StoreEntitySet="Order">
+                <ScalarProperty Name="Image" ColumnName="Image" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="orderMeal1" TypeName="DatabaseModel.orderMeal1" StoreEntitySet="orderMeal">
+            <EndProperty Name="Order">
+              <ScalarProperty Name="orderId" ColumnName="orderId" />
+            </EndProperty>
+            <EndProperty Name="Meal">
+              <ScalarProperty Name="MealId" ColumnName="MealId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>

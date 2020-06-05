@@ -13,6 +13,8 @@ namespace resturant_pro
         {
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+           
         }
+
     }
 }
